@@ -11,10 +11,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 public class GlobalControllerExceptionHandler {
 
     @ExceptionHandler
-    public ResponseEntity<?> handleRunTimeException(EmployeeNotFoundException exc) {
+    public ResponseEntity<?> handleNotFoundException(NotFoundExceptionClass exc) {
         // return ResponseEntity of the exception.
-        log.error("EmployeeNotFoundException caught by GlobalControllerExceptionHandler, {}", exc.toString());
-        return new ResponseEntity<>(exc.getMessage(), HttpStatus.NOT_FOUND);
+        log.error("NotFoundException caught by GlobalControllerExceptionHandler, {}", exc.toString());
+        return new ResponseEntity<>(exc.getMessage(), exc.status);
     }
 
     @ExceptionHandler
