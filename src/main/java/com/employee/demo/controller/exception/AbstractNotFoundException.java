@@ -2,18 +2,18 @@ package com.employee.demo.controller.exception;
 
 import org.springframework.http.HttpStatus;
 
-public abstract class NotFoundExceptionClass extends RuntimeException {
+public abstract class AbstractNotFoundException extends RuntimeException {
     public HttpStatus status = HttpStatus.NOT_FOUND;
 
-    public NotFoundExceptionClass(String message) {
+    public AbstractNotFoundException(String message) {
         super(message);
     }
 
-    public NotFoundExceptionClass(String message, Throwable cause) {
+    public AbstractNotFoundException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public NotFoundExceptionClass(Throwable cause) {
+    public AbstractNotFoundException(Throwable cause) {
         super(cause);
     }
 }

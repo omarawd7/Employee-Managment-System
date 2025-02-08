@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 public class GlobalControllerExceptionHandler {
 
     @ExceptionHandler
-    public ResponseEntity<?> handleNotFoundException(NotFoundExceptionClass exc) {
+    public ResponseEntity<?> handleNotFoundException(AbstractNotFoundException exc) {
         // return ResponseEntity of the exception.
         log.error("NotFoundException caught by GlobalControllerExceptionHandler, {}", exc.toString());
         return new ResponseEntity<>(exc.getMessage(), exc.status);
@@ -23,6 +23,4 @@ public class GlobalControllerExceptionHandler {
         log.error("Exception caught by GlobalControllerExceptionHandler, {}", exc.toString());
         return new ResponseEntity<>( exc.getMessage(), HttpStatus.BAD_REQUEST);
     }
-
-
 }

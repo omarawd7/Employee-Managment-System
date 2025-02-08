@@ -1,7 +1,6 @@
 package com.employee.demo.controller.exception;
 
-
-public class EmployeeNotFoundException extends NotFoundExceptionClass {
+public class EmployeeNotFoundException extends AbstractNotFoundException {
 
     public EmployeeNotFoundException(String message) {
         super(message);

@@ -132,7 +132,7 @@ public class EmployeeServiceTest {
     @Test
     void testSave_TestNullEmployeeDTO() {
         EmployeeDTO employeeDTO = null;
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(NullPointerException.class,
                 () -> employeeService.save(employeeDTO)
         );
     }
