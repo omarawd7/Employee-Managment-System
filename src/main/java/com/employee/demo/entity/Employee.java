@@ -6,11 +6,13 @@ import lombok.*;
 @Setter
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @ToString
 @Entity
 @Table(name="employee")
 public class Employee {
-    public Employee(String firstName, String lastName, String position, int salary, @NonNull String email, @NonNull String phoneNumber) {
+    public Employee(String firstName, String lastName, String position, int salary, @NonNull String email, @NonNull String phoneNumber) { // construct using all fields except the ID field
         this.firstName = firstName;
         this.lastName = lastName;
         this.position = position;

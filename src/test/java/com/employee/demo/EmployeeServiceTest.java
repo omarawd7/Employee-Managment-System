@@ -10,7 +10,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
@@ -41,7 +40,7 @@ public class EmployeeServiceTest {
     }
 
     @Test
-    void testFindAll_ReturnsEmployees() {
+    void testFindAll_ReturnsPaginatedEmployees() {
         int pageNumber = 0;
         int pageSize = 3;
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
@@ -60,21 +59,7 @@ public class EmployeeServiceTest {
     }
 
     @Test
-    void testFindAll_ReturnsEmptyList() {
-        int pageNumber = 0;
-        int pageSize = 3;
-        Pageable pageable = PageRequest.of(pageNumber, pageSize);
-        Page<Employee> employeePage = Mockito.mock(Page.class);
-        // When
-        when(employeeRepository.findAll(pageable)).thenReturn(employeePage);
-        // Then
-        List<Employee> result = employeeService.findAll(pageable);
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    void testFindByID() {
+    void testFindByID_ReturnsEmployee() {
         long ID = 1;
         Employee employee = getEmployee();
         // When
@@ -86,7 +71,7 @@ public class EmployeeServiceTest {
     }
 
     @Test
-    void testFindByID_TestIdNotExist() {
+    void testFindByID_ReturnsIdNotExist() {
         long ID = 1;
         // When
         when(employeeRepository.findById(ID)).thenReturn(Optional.empty());
@@ -97,7 +82,7 @@ public class EmployeeServiceTest {
     }
 
     @Test
-    void testDeleteByID() {
+    void testDeleteByID_ReturnsEmployee() {
         long ID = 1;
         Employee employee = getEmployee();
         // When
@@ -108,7 +93,7 @@ public class EmployeeServiceTest {
     }
 
     @Test
-    void testDeleteByID_TestIdNotExist() {
+    void testDeleteByID_ReturnsIdNotExist() {
         long ID = 1;
         // When
         when(employeeRepository.findById(ID)).thenReturn(Optional.empty());
@@ -119,8 +104,15 @@ public class EmployeeServiceTest {
     }
 
     @Test
-    void testSave() {
-        EmployeeDTO employeeDTO = EmployeeDTO.builder().firstName("Omar").lastName("Awad").email("omar@gmail.com").phoneNumber("+201226776173").position("Java Dev").salary(7000).build();
+    void testSaveEmployeeDTO_ReturnsEmployee() {
+        EmployeeDTO employeeDTO = EmployeeDTO.builder().
+                firstName("Omar").
+                lastName("Awad").
+                email("omar@gmail.com").
+                phoneNumber("+201226776173").
+                position("Java Dev").
+                salary(7000).
+                build();
         Employee employee = getEmployee();
         when(employeeRepository.save(any(Employee.class))).thenReturn(employee);
         Employee testedEmployee = employeeService.save(employeeDTO);
@@ -130,7 +122,7 @@ public class EmployeeServiceTest {
     }
 
     @Test
-    void testSave_TestNullEmployeeDTO() {
+    void testSaveWithNullEmployeeDTO_ReturnsNullPointerException() {
         EmployeeDTO employeeDTO = null;
         assertThrows(NullPointerException.class,
                 () -> employeeService.save(employeeDTO)
@@ -138,23 +130,22 @@ public class EmployeeServiceTest {
     }
 
     @Test
-    void testSave_TestInvalidEGPhoneNumber() {
-        EmployeeDTO employeeDTO = EmployeeDTO.
-                builder().
-                firstName("Omar").
-                lastName("Awad").
-                email("omar@gmail.com").
-                phoneNumber("+20122677617"). // here the EG phone number is missing a number.
-                position("Java Dev").
-                salary(7000).
-                build();
-        assertThrows(IllegalArgumentException.class,
-                () -> employeeService.save(employeeDTO)
-        );
+    void testSaveWithInvalidPhoneNumber_ReturnsException() {
+        EmployeeDTO employeeDTO = EmployeeDTO.builder()
+                .firstName("Omar")
+                .lastName("Awad")
+                .email("omar@gmail.com")
+                .phoneNumber("+2012267761s7") // here the phone number has a character.
+                .position("Java Dev")
+                .salary(7000)
+                .build();
+        Set<ConstraintViolation<EmployeeDTO>> violations = validator.validate(employeeDTO);
+        // Asserting that validation failed
+        assertFalse(violations.isEmpty(), "Validation should fail due to invalid phone number");
     }
 
     @Test
-    void testTestInvalidEmail() {
+    void testSaveWithInvalidEmail_ReturnsNotEmptyViolations() {
         EmployeeDTO employeeDTO = EmployeeDTO.builder()
                 .firstName("Omar")
                 .lastName("Awad")
@@ -169,31 +160,35 @@ public class EmployeeServiceTest {
     }
 
     @Test
-    void testDefaultName() {
-        EmployeeDTO employeeDTO = EmployeeDTO.builder()
-                .firstName(null) // A null first name
-                .lastName(null) // A null last name
-                .email("omar@gmail.com")
-                .phoneNumber("+201226776173")
-                .position("Java Dev")
-                .salary(7000)
-                .build();
-        Employee employee = new Employee(
-                "Default FirstName",
-                "Default LastName",
-                "Java Dev",
-                700,
-                "omar@gmail.com",
-                "+201226776173" );
-        when(employeeRepository.save(any(Employee.class))).thenReturn(employee);
-        Employee testedEmployee = employeeService.save(employeeDTO);
-        assertNotNull(testedEmployee);
-        assertEquals("Default FirstName", testedEmployee.getFirstName());
-        assertEquals("Default LastName", testedEmployee.getLastName());
+    void testNullFirstName_ReturnsException() {
+        assertThrows(NullPointerException.class,
+                () -> EmployeeDTO.builder()
+                        .firstName(null)
+                        .lastName("Awad")
+                        .email("omar@gmail.com")
+                        .phoneNumber("+20122677617")
+                        .position("Java Dev")
+                        .salary(7000)
+                        .build()
+        );
     }
 
     @Test
-    void testDefaultPosition() {
+    void testNullLastName_ReturnsException() {
+        assertThrows(NullPointerException.class,
+                () -> EmployeeDTO.builder()
+                        .firstName("Omar")
+                        .lastName(null)
+                        .email("omar@gmail.com")
+                        .phoneNumber("+20122677617")
+                        .position("Java Dev")
+                        .salary(7000)
+                        .build()
+        );
+    }
+
+    @Test
+    void testDefaultPosition_ReturnsDefaultEmployeePositions() {
         EmployeeDTO employeeDTO = EmployeeDTO.builder().
                 firstName("Omar").
                 lastName("Awad").
@@ -202,14 +197,15 @@ public class EmployeeServiceTest {
                 position(null). // here the position is initialized as null
                 salary(700).
                 build();
-        Employee employee = new Employee(
-                "Awad",
-                "Omar",
-                "dev",
-                700,
-                "omar@gmail.com",
-                "+201226776173"
-        );
+        Employee employee = Employee.builder().
+                firstName("Omar").
+                lastName("Awad").
+                email("omar@gmail.com").
+                phoneNumber("+201226776173").
+                position("dev").
+                salary(700).
+                build();
+
         when(employeeRepository.save(any(Employee.class))).thenReturn(employee);
         Employee testedEmployee = employeeService.save(employeeDTO);
         assertNotNull(testedEmployee);

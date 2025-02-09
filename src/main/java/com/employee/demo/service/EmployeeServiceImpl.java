@@ -4,7 +4,8 @@ import com.employee.demo.controller.exception.EmployeeNotFoundException;
 import com.employee.demo.dao.EmployeeRepository;
 import com.employee.demo.dto.EmployeeDTO;
 import com.employee.demo.entity.Employee;
-import com.employee.demo.utils.Validation;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -36,18 +37,17 @@ public class EmployeeServiceImpl implements EmployeeService{
 
     @Transactional
     @Override
-    public Employee save(EmployeeDTO employeeDTO) {
-        validateNotNullEmployeeDTO(employeeDTO);
-        Employee employee = new Employee(
-                employeeDTO.getFirstName()
-                ,employeeDTO.getLastName()
-                ,employeeDTO.getPosition()
-                , employeeDTO.getSalary()
-                ,employeeDTO.getEmail()
-                ,employeeDTO.getPhoneNumber());
-        validateEmployeeEGPhoneNumber(employee);
+    public Employee save(@NotNull @Valid EmployeeDTO employeeDTO) {
+        Employee employee =  Employee.builder().
+                firstName(employeeDTO.getFirstName()).
+                lastName(employeeDTO.getLastName()).
+                email(employeeDTO.getEmail()).
+                phoneNumber(employeeDTO.getPhoneNumber()).
+                position(employeeDTO.getPosition()).
+                        salary(employeeDTO.getSalary()).
+                build();
         Employee savedEmployee = employeeRepository.save(employee);
-        log.info("The Employee " + savedEmployee + " is saved successfully");
+        log.debug("The Employee " + savedEmployee + " is saved successfully");
         return savedEmployee;
     }
 
@@ -56,24 +56,10 @@ public class EmployeeServiceImpl implements EmployeeService{
     public void deleteById(long Id) {
         if(employeeRepository.findById(Id).isPresent()){
             employeeRepository.deleteById(Id);
-            log.info("The Employee id: " + Id + " is deleted successfully");
+            log.debug("The Employee id: " + Id + " is deleted successfully");
         }else{
             log.error("Employee id: " + Id + " not found");
             throw new EmployeeNotFoundException("Employee id: " + Id + " not found");
-        }
-    }
-
-    private void validateNotNullEmployeeDTO(EmployeeDTO employeeDTO) {
-        if (employeeDTO == null) {
-            log.error("The EmployeeDTO object have a null value.");
-            throw new NullPointerException("Employee object cannot be null");
-        }
-    }
-
-    public void validateEmployeeEGPhoneNumber(Employee employee) {
-        if (!Validation.isValidEGPhoneNumber(employee.getPhoneNumber())) {
-            log.error("The Employee {}, have Invalid EG phone number format.", employee);
-            throw new IllegalArgumentException("Invalid EG phone number format");
         }
     }
 }

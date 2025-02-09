@@ -2,6 +2,7 @@ package com.employee.demo.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Pattern;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NonNull;
@@ -10,10 +11,10 @@ import org.springframework.beans.factory.annotation.Value;
 @Data
 @Builder
 public class EmployeeDTO {
-    @Value("Default First Name")
+    @NonNull
     private String firstName;
 
-    @Value("Default Last Name")
+    @NonNull
     private String lastName;
 
     @Value("dev")
@@ -26,6 +27,10 @@ public class EmployeeDTO {
     @NonNull
     private String email;
 
+    @Pattern(
+            regexp = "^(\\+\\d{1,3}[- ]?)?\\d{10}$",
+            message = "Invalid phone number format."
+    )
     @NonNull
     private String phoneNumber;
 }
