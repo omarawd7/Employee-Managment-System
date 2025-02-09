@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -33,6 +34,7 @@ public class EmployeeServiceImpl implements EmployeeService{
         }
     }
 
+    @Transactional
     @Override
     public Employee save(EmployeeDTO employeeDTO) {
         validateNotNullEmployeeDTO(employeeDTO);
@@ -49,6 +51,7 @@ public class EmployeeServiceImpl implements EmployeeService{
         return savedEmployee;
     }
 
+    @Transactional
     @Override
     public void deleteById(long Id) {
         if(employeeRepository.findById(Id).isPresent()){
